@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import Confetti from "react-confetti";
 import useSound from "use-sound";
 
-const successSound = "/sounds/success.mp3"; // Add your sound to public/sounds
+const successSound = "/sounds/success.mp3";
 
 const screens = [
   {
@@ -22,7 +22,7 @@ const screens = [
   },
 ];
 
-export default function Onboarding({ toggleTheme, darkMode, onFinish }) {
+export default function Onboarding({onFinish }) {
   const [index, setIndex] = useState(0);
   const [showConfetti, setShowConfetti] = useState(false);
   const [playSuccess] = useSound(successSound);

@@ -17,7 +17,7 @@ const App = () => {
   const [answers, setAnswers] = useState({});
   const [submitted, setSubmitted] = useState(false);
   const [score, setScore] = useState(0);
-  const [timer, setTimer] = useState(300);
+  const [timer, setTimer] = useState(60);
   const [leaderboard, setLeaderboard] = useState([]);
 
    const HandleLink = () => {
@@ -27,6 +27,10 @@ const App = () => {
      window.location.href = "/leaderboard";
    };    
 
+   const HandleLinkSignIn = () => {
+     window.location.href = "/login";
+   };
+
   const QUESTIONS_PER_PAGE = 10;
   const totalPages = Math.ceil(questions.length / QUESTIONS_PER_PAGE);
 
@@ -34,7 +38,7 @@ const App = () => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
       if (currentUser) {
-        setTimer(300); // reset timer on sign in
+        setTimer(60);
       }
     });
     return () => unsubscribe();
@@ -141,7 +145,20 @@ const handleSubmit = async () => {
 
   if (!user)
     return (
-      <div className="p-4 text-center">Please sign in to take the quiz.</div>
+      <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-tr from-indigo-100 via-purple-100 to-pink-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg">
+          <h2 className="text-2xl font-bold mb-4 text-center dark:text-white">Please Sign In</h2>
+          <p className="text-lg mb-4 text-center dark:text-white">
+            You need to be signed in to take the quiz.
+          </p>
+          <button
+            className="bg-purple-600 text-white px-5 py-2 rounded-lg hover:bg-purple-700 transition flex items-center justify-center w-full"
+            onClick={HandleLinkSignIn}
+          >
+            Sign Out
+          </button>
+        </div>
+      </div>
     );
 
   return (
@@ -167,20 +184,20 @@ const handleSubmit = async () => {
         )}
       </div>
 
-      <div className="max-w-3xl mx-auto bg-white p-6 rounded-xl shadow-lg mt-20">
+      <div className="max-w-3xl mx-auto bg-white dark:bg-gray-800  p-6 rounded-xl shadow-lg mt-20">
         {!submitted && (
           <>
             {/* Questions */}
             {paginatedQuestions.map((q) => (
               <div key={q.id} className="mb-8">
-                <h2 className="font-semibold text-lg text-gray-800 mb-3">
+                <h2 className="font-semibold text-lg text-gray-800 dark:text-white mb-3">
                   {q.id}. {q.question}
                 </h2>
                 <div className="space-y-2">
                   {q.options.map((option, i) => (
                     <label
                       key={i}
-                      className="flex items-center gap-2 bg-gray-50 border border-gray-300 rounded-lg p-2 hover:bg-purple-50 cursor-pointer transition"
+                      className="flex items-center gap-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-500 dark:hover:bg-purple-900 rounded-lg p-2 hover:bg-purple-50 cursor-pointer transition"
                     >
                       <input
                         type="radio"
@@ -191,7 +208,7 @@ const handleSubmit = async () => {
                         onChange={() => handleOptionChange(q.id, option)}
                         required
                       />
-                      <span>{option}</span>
+                      <span className="dark:text-white">{option}</span>
                     </label>
                   ))}
                 </div>
