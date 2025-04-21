@@ -74,9 +74,9 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-100 via-purple-200 to-pink-100 dark:from-gray-900 dark:via-gray-800 dark:to-black transition-colors duration-500">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-pink-100 via-purple-100 to-blue-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 transition-all duration-300 px-4">
       <div className="w-full max-w-md p-8 bg-white dark:bg-gray-900 shadow-xl rounded-2xl ">
-        <h2 className="text-3xl font-extrabold text-center text-gray-800 dark:text-white mb-6 animate-pulse">
+        <h2 className="text-3xl font-extrabold text-center text-purple-700 dark:text-purple-300 mb-5">
           Welcome Back 👋
         </h2>
         {error && (

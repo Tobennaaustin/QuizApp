@@ -45,14 +45,14 @@ export default function Onboarding({ toggleTheme, darkMode, onFinish }) {
   return (
     <div className="flex flex-col items-center justify-between h-screen p-6 text-center transition-all relative">
       {showConfetti && <Confetti />}
-      <div className="flex justify-end w-full">
+      {/* <div className="flex justify-end w-full">
         <button
           onClick={toggleTheme}
           className="text-sm bg-gray-200 dark:bg-gray-800 px-3 py-1 rounded-full"
         >
           {darkMode ? "☀️ Day Mode" : "🌙 Night Mode"}
         </button>
-      </div>
+      </div> */}
 
       <div className="mt-8">
         <div className="text-6xl">{current.emoji}</div>

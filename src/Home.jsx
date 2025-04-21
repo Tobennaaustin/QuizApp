@@ -26,14 +26,14 @@ export default function Home() {
   };
 
   return (
-    <div className={darkMode ? "dark" : ""}>
+    <div>
       <div className="min-h-screen transition duration-500 bg-white dark:bg-gray-900 text-gray-800 dark:text-white">
         {showSplash ? (
           <SplashScreen />
         ) : showOnboarding ? (
           <Onboarding
-            toggleTheme={() => setDarkMode(!darkMode)}
-            darkMode={darkMode}
+            // toggleTheme={() => setDarkMode(!darkMode)}
+            // darkMode={darkMode}
             onFinish={handleFinishOnboarding}
           />
         ) : (

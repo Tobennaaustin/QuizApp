@@ -76,6 +76,7 @@ const App = () => {
 
 
 const handleSubmit = async () => {
+  window.scrollTo({ top: 0, behavior: "smooth" });
   let newScore = 0;
   questions.forEach((q) => {
     if (answers[q.id] === q.answer) {
@@ -117,14 +118,20 @@ const handleSubmit = async () => {
   const nextPage = () => {
     if (currentPage < totalPages) {
       setCurrentPage((prev) => prev + 1);
+      window.scrollTo({ top: 0, behavior: "smooth" });
     } else {
       handleSubmit();
     }
   };
 
+
   const prevPage = () => {
-    if (currentPage > 1) setCurrentPage((prev) => prev - 1);
+    if (currentPage > 1) {
+      setCurrentPage((prev) => prev - 1);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
   };
+
 
   const formatTime = (seconds) => {
     const m = Math.floor(seconds / 60);
@@ -138,138 +145,8 @@ const handleSubmit = async () => {
     );
 
   return (
-    // <div className="max-w-3xl mx-auto p-4">
-    //   <div className="flex justify-between items-center mb-4">
-    //     <h1 className="text-2xl font-bold">Frontend Quiz</h1>
-    //     <div className="text-lg">⏱️ {formatTime(timer)}</div>
-    //   </div>
-
-    //   {!submitted && (
-    //     <div>
-    //       <div className="w-full bg-gray-300 rounded-full h-4 mb-6 overflow-hidden">
-    //         <div
-    //           className="bg-gradient-to-r from-purple-500 via-pink-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 h-full transition-all duration-500 ease-in-out"
-    //           style={{
-    //             width: `${
-    //               (Object.keys(answers).length / questions.length) * 100
-    //             }%`,
-    //           }}
-    //         ></div>
-    //       </div>
-    //       {paginatedQuestions.map((q) => (
-    //         <div key={q.id} className="mb-6">
-    //           <h2 className="font-semibold mb-2">
-    //             {q.id}. {q.question}
-    //           </h2>
-    //           {q.options.map((option, i) => (
-    //             <div key={i}>
-    //               <label className="inline-flex items-center">
-    //                 <input
-    //                   type="radio"
-    //                   className="form-radio mr-2"
-    //                   name={`question-${q.id}`}
-    //                   value={option}
-    //                   checked={answers[q.id] === option}
-    //                   onChange={() => handleOptionChange(q.id, option)}
-    //                   required
-    //                 />
-    //                 {option}
-    //               </label>
-    //             </div>
-    //           ))}
-    //         </div>
-    //       ))}
-    //       <div className="flex justify-between">
-    //         {currentPage > 1 && (
-    //           <button className="btn-primary" onClick={prevPage}>
-    //             Previous
-    //           </button>
-    //         )}
-    //         <button className="btn-primary" onClick={nextPage}>
-    //           {currentPage === totalPages ? "Submit" : "Next"}
-    //         </button>
-    //       </div>
-    //     </div>
-    //   )}
-
-    //   {submitted && (
-    //     <div className="mt-6">
-    //       <h2 className="text-xl font-bold mb-2">Your Score: {score}/20</h2>
-    //       <p className={score >= 14 ? "text-green-600" : "text-red-600"}>
-    //         {score >= 14 ? "You Passed! 🎉" : "You Failed. Try Again!"}
-    //       </p>
-
-    //       <div className="mt-6">
-    //         {questions.map((q) => (
-    //           <div key={q.id} className="mb-4">
-    //             <h3 className="font-medium mb-1">
-    //               {q.id}. {q.question}
-    //             </h3>
-    //             {q.options.map((option, i) => {
-    //               const isCorrect = option === q.answer;
-    //               const isUserAnswer = answers[q.id] === option;
-    //               const className = isCorrect
-    //                 ? "text-green-600"
-    //                 : isUserAnswer
-    //                 ? "text-red-600"
-    //                 : "text-gray-800";
-
-    //               return (
-    //                 <p key={i} className={className}>
-    //                   • {option}
-    //                 </p>
-    //               );
-    //             })}
-    //           </div>
-    //         ))}
-    //       </div>
-
-    //       <div className="mt-6">
-    //         <h3 className="text-lg font-semibold mb-2">Leaderboard</h3>
-    //         <ul className="bg-white rounded-xl shadow p-4 max-h-60 overflow-y-auto space-y-3 animate-fade-in">
-    //           {leaderboard.map((entry, idx) => {
-    //             const rankIcons = ["🥇", "🥈", "🥉"];
-    //             const rank =
-    //               rankIcons[entry.position - 1] || `#${entry.position}`;
-    //             const initials = entry.name?.slice(0, 2).toUpperCase();
-
-    //             return (
-    //               <li
-    //                 key={idx}
-    //                 className="border-b pb-2 flex items-center justify-between gap-4 animate-slide-in"
-    //               >
-    //                 <div className="flex items-center gap-3">
-    //                   <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center font-bold text-blue-700">
-    //                     {initials}
-    //                   </div>
-    //                   <div>
-    //                     <p className="font-medium">
-    //                       {rank} {entry.name}
-    //                     </p>
-    //                   </div>
-    //                 </div>
-    //                 <span className="font-bold text-blue-600">
-    //                   {entry.score}
-    //                 </span>
-    //               </li>
-    //             );
-    //           })}
-    //         </ul>
-    //       </div>
-    //     </div>
-    //   )}
-
-    //   <div className="mt-6 text-center">
-    //     <button
-    //       className="text-sm text-blue-500 underline"
-    //       onClick={() => signOut(auth)}
-    //     >
-    //       Sign out
-    //     </button>
-    //   </div>
-    // </div>
-    <div className="min-h-screen bg-gradient-to-tr from-indigo-100 via-purple-100 to-pink-100 py-8 px-4">
-      <div className="fixed top-0 left-0 w-full bg-white z-50 shadow-md mb-10">
+    <div className="min-h-screen bg-gradient-to-tr from-indigo-100 via-purple-100 to-pink-100 py-8 px-4 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+      <div className="fixed top-0 left-0 w-full bg-white dark:bg-slate-700 dark:text-white z-50 shadow-md mb-10">
         <div className="max-w-3xl mx-auto p-4 flex justify-between items-center">
           <h1 className="text-xl sm:text-2xl font-bold">Frontend Quiz</h1>
           <div className="text-lg font-medium">⏱️ {formatTime(timer)}</div>
@@ -291,10 +168,8 @@ const handleSubmit = async () => {
       </div>
 
       <div className="max-w-3xl mx-auto bg-white p-6 rounded-xl shadow-lg mt-20">
-        
         {!submitted && (
           <>
-            
             {/* Questions */}
             {paginatedQuestions.map((q) => (
               <div key={q.id} className="mb-8">
