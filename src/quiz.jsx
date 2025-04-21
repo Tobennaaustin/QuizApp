@@ -1,0 +1,405 @@
+import React, { useEffect, useState } from "react";
+import { auth, db } from "./firebase";
+import { onAuthStateChanged, signOut } from "firebase/auth";
+import {
+  collection,
+  getDocs,
+  query,
+  orderBy,
+  limit,
+} from "firebase/firestore";
+import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
+import questions from "./questions.json";
+
+const App = () => {
+  const [user, setUser] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [answers, setAnswers] = useState({});
+  const [submitted, setSubmitted] = useState(false);
+  const [score, setScore] = useState(0);
+  const [timer, setTimer] = useState(300);
+  const [leaderboard, setLeaderboard] = useState([]);
+
+   const HandleLink = () => {
+     window.location.href = "/quiz";
+   };
+   const HandleLinkLeaderboard = () => {
+     window.location.href = "/leaderboard";
+   };    
+
+  const QUESTIONS_PER_PAGE = 10;
+  const totalPages = Math.ceil(questions.length / QUESTIONS_PER_PAGE);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+      if (currentUser) {
+        setTimer(300); // reset timer on sign in
+      }
+    });
+    return () => unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    if (!submitted && user && timer > 0) {
+      const interval = setInterval(() => setTimer((prev) => prev - 1), 1000);
+      return () => clearInterval(interval);
+    }
+    if (timer === 0 && !submitted) {
+      handleSubmit();
+    }
+  }, [timer, submitted, user]);
+
+  useEffect(() => {
+    const fetchLeaderboard = async () => {
+      const q = query(
+        collection(db, "users"),
+        orderBy("score", "desc"),
+        limit(5)
+      );
+      const snapshot = await getDocs(q);
+      const topScores = snapshot.docs.map((doc, index) => ({
+        ...doc.data(),
+        position: index + 1,
+      }));
+      setLeaderboard(topScores);
+    };
+    fetchLeaderboard();
+  }, [submitted]);
+
+  const handleOptionChange = (questionId, option) => {
+    if (!submitted) {
+      setAnswers((prev) => ({ ...prev, [questionId]: option }));
+    }
+  };
+
+
+
+const handleSubmit = async () => {
+  let newScore = 0;
+  questions.forEach((q) => {
+    if (answers[q.id] === q.answer) {
+      newScore++;
+    }
+  });
+  setScore(newScore);
+  setSubmitted(true);
+
+  if (user) {
+    const userRef = doc(db, "users", user.uid);
+
+    try {
+      const userSnap = await getDoc(userRef);
+      if (userSnap.exists()) {
+        await updateDoc(userRef, {
+          score: newScore,
+          timestamp: new Date(),
+        });
+      } else {
+        await setDoc(userRef, {
+          name: user.displayName || user.email,
+          score: newScore,
+          timestamp: new Date(),
+        });
+      }
+    } catch (err) {
+      console.error("Error saving score:", err);
+    }
+  }
+};
+
+
+  const paginatedQuestions = questions.slice(
+    (currentPage - 1) * QUESTIONS_PER_PAGE,
+    currentPage * QUESTIONS_PER_PAGE
+  );
+
+  const nextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage((prev) => prev + 1);
+    } else {
+      handleSubmit();
+    }
+  };
+
+  const prevPage = () => {
+    if (currentPage > 1) setCurrentPage((prev) => prev - 1);
+  };
+
+  const formatTime = (seconds) => {
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    return `${m}:${s < 10 ? "0" : ""}${s}`;
+  };
+
+  if (!user)
+    return (
+      <div className="p-4 text-center">Please sign in to take the quiz.</div>
+    );
+
+  return (
+    // <div className="max-w-3xl mx-auto p-4">
+    //   <div className="flex justify-between items-center mb-4">
+    //     <h1 className="text-2xl font-bold">Frontend Quiz</h1>
+    //     <div className="text-lg">⏱️ {formatTime(timer)}</div>
+    //   </div>
+
+    //   {!submitted && (
+    //     <div>
+    //       <div className="w-full bg-gray-300 rounded-full h-4 mb-6 overflow-hidden">
+    //         <div
+    //           className="bg-gradient-to-r from-purple-500 via-pink-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 h-full transition-all duration-500 ease-in-out"
+    //           style={{
+    //             width: `${
+    //               (Object.keys(answers).length / questions.length) * 100
+    //             }%`,
+    //           }}
+    //         ></div>
+    //       </div>
+    //       {paginatedQuestions.map((q) => (
+    //         <div key={q.id} className="mb-6">
+    //           <h2 className="font-semibold mb-2">
+    //             {q.id}. {q.question}
+    //           </h2>
+    //           {q.options.map((option, i) => (
+    //             <div key={i}>
+    //               <label className="inline-flex items-center">
+    //                 <input
+    //                   type="radio"
+    //                   className="form-radio mr-2"
+    //                   name={`question-${q.id}`}
+    //                   value={option}
+    //                   checked={answers[q.id] === option}
+    //                   onChange={() => handleOptionChange(q.id, option)}
+    //                   required
+    //                 />
+    //                 {option}
+    //               </label>
+    //             </div>
+    //           ))}
+    //         </div>
+    //       ))}
+    //       <div className="flex justify-between">
+    //         {currentPage > 1 && (
+    //           <button className="btn-primary" onClick={prevPage}>
+    //             Previous
+    //           </button>
+    //         )}
+    //         <button className="btn-primary" onClick={nextPage}>
+    //           {currentPage === totalPages ? "Submit" : "Next"}
+    //         </button>
+    //       </div>
+    //     </div>
+    //   )}
+
+    //   {submitted && (
+    //     <div className="mt-6">
+    //       <h2 className="text-xl font-bold mb-2">Your Score: {score}/20</h2>
+    //       <p className={score >= 14 ? "text-green-600" : "text-red-600"}>
+    //         {score >= 14 ? "You Passed! 🎉" : "You Failed. Try Again!"}
+    //       </p>
+
+    //       <div className="mt-6">
+    //         {questions.map((q) => (
+    //           <div key={q.id} className="mb-4">
+    //             <h3 className="font-medium mb-1">
+    //               {q.id}. {q.question}
+    //             </h3>
+    //             {q.options.map((option, i) => {
+    //               const isCorrect = option === q.answer;
+    //               const isUserAnswer = answers[q.id] === option;
+    //               const className = isCorrect
+    //                 ? "text-green-600"
+    //                 : isUserAnswer
+    //                 ? "text-red-600"
+    //                 : "text-gray-800";
+
+    //               return (
+    //                 <p key={i} className={className}>
+    //                   • {option}
+    //                 </p>
+    //               );
+    //             })}
+    //           </div>
+    //         ))}
+    //       </div>
+
+    //       <div className="mt-6">
+    //         <h3 className="text-lg font-semibold mb-2">Leaderboard</h3>
+    //         <ul className="bg-white rounded-xl shadow p-4 max-h-60 overflow-y-auto space-y-3 animate-fade-in">
+    //           {leaderboard.map((entry, idx) => {
+    //             const rankIcons = ["🥇", "🥈", "🥉"];
+    //             const rank =
+    //               rankIcons[entry.position - 1] || `#${entry.position}`;
+    //             const initials = entry.name?.slice(0, 2).toUpperCase();
+
+    //             return (
+    //               <li
+    //                 key={idx}
+    //                 className="border-b pb-2 flex items-center justify-between gap-4 animate-slide-in"
+    //               >
+    //                 <div className="flex items-center gap-3">
+    //                   <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center font-bold text-blue-700">
+    //                     {initials}
+    //                   </div>
+    //                   <div>
+    //                     <p className="font-medium">
+    //                       {rank} {entry.name}
+    //                     </p>
+    //                   </div>
+    //                 </div>
+    //                 <span className="font-bold text-blue-600">
+    //                   {entry.score}
+    //                 </span>
+    //               </li>
+    //             );
+    //           })}
+    //         </ul>
+    //       </div>
+    //     </div>
+    //   )}
+
+    //   <div className="mt-6 text-center">
+    //     <button
+    //       className="text-sm text-blue-500 underline"
+    //       onClick={() => signOut(auth)}
+    //     >
+    //       Sign out
+    //     </button>
+    //   </div>
+    // </div>
+    <div className="min-h-screen bg-gradient-to-tr from-indigo-100 via-purple-100 to-pink-100 py-8 px-4">
+      <div className="fixed top-0 left-0 w-full bg-white z-50 shadow-md mb-10">
+        <div className="max-w-3xl mx-auto p-4 flex justify-between items-center">
+          <h1 className="text-xl sm:text-2xl font-bold">Frontend Quiz</h1>
+          <div className="text-lg font-medium">⏱️ {formatTime(timer)}</div>
+        </div>
+        {!submitted && (
+          <div className="max-w-3xl mx-auto px-4 pb-2">
+            <div className="w-full bg-gray-300 rounded-full h-3 overflow-hidden">
+              <div
+                className="bg-gradient-to-r from-purple-500 via-pink-500 to-blue-500 h-full transition-all duration-500 ease-in-out"
+                style={{
+                  width: `${
+                    (Object.keys(answers).length / questions.length) * 100
+                  }%`,
+                }}
+              ></div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      <div className="max-w-3xl mx-auto bg-white p-6 rounded-xl shadow-lg mt-20">
+        
+        {!submitted && (
+          <>
+            
+            {/* Questions */}
+            {paginatedQuestions.map((q) => (
+              <div key={q.id} className="mb-8">
+                <h2 className="font-semibold text-lg text-gray-800 mb-3">
+                  {q.id}. {q.question}
+                </h2>
+                <div className="space-y-2">
+                  {q.options.map((option, i) => (
+                    <label
+                      key={i}
+                      className="flex items-center gap-2 bg-gray-50 border border-gray-300 rounded-lg p-2 hover:bg-purple-50 cursor-pointer transition"
+                    >
+                      <input
+                        type="radio"
+                        className="accent-purple-600"
+                        name={`question-${q.id}`}
+                        value={option}
+                        checked={answers[q.id] === option}
+                        onChange={() => handleOptionChange(q.id, option)}
+                        required
+                      />
+                      <span>{option}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            ))}
+
+            {/* Navigation Buttons */}
+            <div className="flex justify-between mt-8">
+              {currentPage > 1 && (
+                <button
+                  className="bg-gray-200 text-gray-700 px-5 py-2 rounded-lg hover:bg-gray-300 transition"
+                  onClick={prevPage}
+                >
+                  Previous
+                </button>
+              )}
+              <button
+                className="bg-purple-600 text-white px-5 py-2 rounded-lg hover:bg-purple-700 transition"
+                onClick={nextPage}
+              >
+                {currentPage === totalPages ? "Submit" : "Next"}
+              </button>
+            </div>
+          </>
+        )}
+
+        {/* Score & Answers */}
+        {submitted && (
+          <div className="mt-10">
+            <h2 className="text-2xl font-bold mb-3 text-purple-700">
+              Your Score: {score}/20
+            </h2>
+            <p
+              className={`text-lg font-semibold ${
+                score >= 14 ? "text-green-600" : "text-red-600"
+              }`}
+            >
+              {score >= 14 ? "You Passed! 🎉" : "You Failed. Try Again!"}
+            </p>
+
+            <div className="mt-6 space-y-6">
+              {questions.map((q) => (
+                <div key={q.id} className="bg-gray-50 p-4 rounded-lg shadow">
+                  <h3 className="font-medium mb-2">
+                    {q.id}. {q.question}
+                  </h3>
+                  {q.options.map((option, i) => {
+                    const isCorrect = option === q.answer;
+                    const isUserAnswer = answers[q.id] === option;
+
+                    const textColor = isCorrect
+                      ? "text-green-600 font-semibold"
+                      : isUserAnswer
+                      ? "text-red-600 font-semibold"
+                      : "text-gray-700";
+
+                    return (
+                      <p key={i} className={`${textColor} ml-2`}>
+                        • {option}
+                      </p>
+                    );
+                  })}
+                </div>
+              ))}
+            </div>
+
+            <button
+              className="bg-purple-600 text-white px-5 py-2 rounded-lg hover:bg-purple-700 transition mt-10 mr-10"
+              onClick={HandleLinkLeaderboard}
+            >
+              See Leader Board
+            </button>
+            <button
+              className="bg-purple-600 text-white px-5 py-2 rounded-lg hover:bg-purple-700 transition mt-10"
+              onClick={HandleLink}
+            >
+              Retake Quiz
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default App;
