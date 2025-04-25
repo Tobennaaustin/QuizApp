@@ -31,7 +31,7 @@ export default function Leaderboard() {
   const topThree = leaderboard.slice(0, 3);
   const others = leaderboard.slice(3);
 
-  const maxScore = Math.max(...topThree.map((e) => e.score || 0), 1); // Prevent divide by 0
+  const maxScore = Math.max(...topThree.map((e) => e.score || 0), 1); 
 
   return (
     <>
@@ -42,7 +42,7 @@ export default function Leaderboard() {
               🏆 Leaderboard
             </h3>
 
-            {/* Top 3 Bar Chart */}
+            
             <div className="flex justify-center items-end gap-6 sm:gap-10 h-48 sm:h-56 mb-10">
               {[1, 0, 2].map((i) => {
                 const entry = topThree[i];
@@ -77,7 +77,7 @@ export default function Leaderboard() {
               })}
             </div>
 
-            {/* Other Players */}
+            
             {others.length > 0 && (
               <ul className="bg-white dark:bg-gray-800 rounded-xl shadow p-4 space-y-3 max-h-64 overflow-y-auto animate-fade-in">
                 {others.map((entry) => {

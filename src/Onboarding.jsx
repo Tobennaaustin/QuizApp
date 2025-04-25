@@ -7,20 +7,21 @@ const successSound = "/sounds/success.mp3";
 const screens = [
   {
     title: "Welcome to Quizzo!",
-    desc: "Challenge your mind with daily trivia and quizzes.",
+    desc: "Challenge your brain with fun and engaging quizzes.",
     emoji: "🧠",
   },
   {
     title: "Track Your Progress",
-    desc: "Unlock badges and climb the leaderboard!",
+    desc: "Earn points, unlock badges, and climb the leaderboard!",
     emoji: "📈",
   },
   {
-    title: "Customize Experience",
-    desc: "Switch themes, choose topics, and set goals.",
-    emoji: "🎯",
+    title: "Compete & Improve",
+    desc: "Come back daily to improve your score and beat your best!",
+    emoji: "🔥",
   },
 ];
+
 
 export default function Onboarding({onFinish }) {
   const [index, setIndex] = useState(0);
